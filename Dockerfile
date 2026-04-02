@@ -1,5 +1,5 @@
-# Use Java 17
-FROM openjdk:17-jdk-slim
+# Use official Java image
+FROM eclipse-temurin:17-jdk
 
 # Copy jar
 COPY target/*.jar app.jar
