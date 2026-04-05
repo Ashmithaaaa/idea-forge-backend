@@ -37,10 +37,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
     </dependency>
 
     <!-- Security (Required for JWT protection) -->
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-security</artifactId>
-    </dependency>
+   
 
     <!-- Password Encryption -->
     <dependency>
