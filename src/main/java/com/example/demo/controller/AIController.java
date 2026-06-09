@@ -13,7 +13,8 @@ import java.util.Map;
 @RequestMapping("/api/ai")
 public class AIController {
 
-    @Value("${groq.api.key}")
+    // Prevent startup failure if key is missing
+    @Value("${groq.api.key:dummy}")
     private String apiKey;
 
     @GetMapping("/analyze")
@@ -25,10 +26,19 @@ public class AIController {
     public String analyzePost(@RequestBody Map<String, String> body) throws Exception {
 
         String idea = body.get("idea");
+
+        if (idea == null || idea.trim().isEmpty()) {
+            return "Idea cannot be empty";
+        }
+
         return callGroq(idea);
     }
 
-    public String callGroq(String idea) throws Exception {
+    private String callGroq(String idea) throws Exception {
+
+        if ("dummy".equals(apiKey)) {
+            return "Groq API key is not configured.";
+        }
 
         String prompt =
                 "Analyze this startup idea: " + idea +
@@ -37,7 +47,7 @@ public class AIController {
         String requestBody = "{"
                 + "\"model\":\"llama-3.1-8b-instant\","
                 + "\"messages\":["
-                + "{ \"role\":\"user\", \"content\":\"" + prompt + "\" }"
+                + "{ \"role\":\"user\", \"content\":\"" + prompt.replace("\"", "\\\"") + "\" }"
                 + "]"
                 + "}";
 
@@ -53,16 +63,6 @@ public class AIController {
         HttpResponse<String> response =
                 client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        String responseBody = response.body();
-
-        int start = responseBody.indexOf("\"content\":\"") + 11;
-        int end = responseBody.indexOf("\"", start);
-
-        String cleanText = responseBody.substring(start, end);
-
-        cleanText = cleanText.replace("\\n", "\n")
-                             .replace("\\\"", "\"");
-
-        return cleanText;
+        return response.body();
     }
 }
